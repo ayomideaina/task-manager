@@ -1,67 +1,3 @@
-
-// ///function declaration
-// // function greeting() {
-// //     console.log('Good morning class')
-// // }
-
-// ///function expression
-
-// const greet = function() {
-//     console.log('Good afternoon, Allen')
-// }
-
-
-// function greeting(name) {
-//     console.log(`Good morning everyone, my name is ${name}`)
-// }
-
-// // const calcAge = (name, yearOfBirth) => {
-// //     console.log(`Good morning everyone, my name is ${name} and i am ${2025 - yearOfBirth} years old`)
-// // }
-
-
-// // calcAge('Allen', 1998)
-// // calcAge('comfort', 2002)
-// // calcAge('Akin', 2000)
-// // calcAge('Godfrey', 2001)
-
-// // const calcAge = function (birthYear) {
-// //     return 2025 - birthYear
-// // }
-
-
-// // const yearsUntilRetirement = function(birthYear, firstName)   {
-// //     const age = calcAge(birthYear)
-// //     const retirement = 65 - age
-
-
-// //     if(retirement > 0) {
-// //         console.log(`${firstName} retires in ${retirement}`)
-// //     } else {
-// //         console.log(`${firstName} has already retired`)
-// //     }
-// // }
-
-
-// // console.log(yearsUntilRetirement(1998, 'Allen'))
-
-// /////Array
-// const friend1 = 'James'
-// const friend2 = 'Margret'
-// const friend3 = 'comfort'
-
-// console.log(friend1, friend2, friend3)
-
-
-// // console.log(friends[2])
-
-
-// ////Basic Array methods
-// const friends = ['James', 'Margret', 'Comfort', 'Hammed']
-//  friends.push('Daniel') ///Add to the end
-// // const newFriends = friends.unshift('Daniel') /// Add to the beginning
-
-////DOM ELEMENTS SELECTION
 const taskInput = document.getElementById('task-input')
 const addBtn = document.getElementById('add-btn')
 const taskList = document.getElementById('task-list')
@@ -76,16 +12,6 @@ const filterButtons = document.querySelectorAll('.filter-btn')
 let tasks = []
 let taskIdCounter = 1
 let currentFilter = 'all'
-
-
-///CLICK EVENT ON BUTTON
-
-// addBtn.addEventListener('click', addTask());
-taskInput.addEventListener('keypress', function(e) {
-    if(e.key === 'Enter') {
-        addTask()
-    }
-})
 
 
 ////iNPUT VALIDATION
@@ -111,12 +37,10 @@ filterButtons.forEach(btn => {
 const addTask = () => {
     const taskText = taskInput.value.trim();
 
-
     if(taskText === '') {
         alert('Please enter task');
         return
     };
-
 
     ////create task object
     const task = {
@@ -127,39 +51,58 @@ const addTask = () => {
     }
 
     ////Updating the Array with new task
-    tasks.push()
+    tasks.push(task)
 
     ///Clear input
     taskInput.value = "",
-    addBtn.disable = true
+    addBtn.disabled = true
 
     ///update ui
-
     renderTask()
-    // updateTask()
-
+    updateTask()
 }
+
+///CLICK EVENT ON BUTTON
+
+addBtn.addEventListener('click', addTask);
+taskInput.addEventListener('keypress', function(e) {
+    if(e.key === 'Enter') {
+        addTask()
+    }
+})
 
 
 const toggleTask = (taskId) => {
     const task = tasks.find(task => task.id === taskId)
 
     if(task) {
-        task.completed = !taskCompleted;
+        task.completed = !task.completed;
         renderTask()
-        // updateTask()
+        updateTask()
     }
 }
 
 
 const deleteTask =(taskId) => {
     if(confirm('Are you sure you want to delete this task?')) {
-        tasks = tasks.filter(task => task.id);
+        tasks = tasks.filter(task => task.id !== taskId);
 
         renderTask()
-        // updateTask()
+        updateTask()
     }
 } 
+
+
+const editTask = (taskId) => {
+    const task = tasks.find(t => t.id === taskId);
+    const newText = prompt("Edit your task:", task.text);
+
+    if (newText !== null && newText.trim() !== "") {
+        task.text = newText.trim();
+        renderTask();
+        updateTask();
+    }
+};
 
 
 const renderTask = () => {
@@ -180,6 +123,12 @@ const renderTask = () => {
         return
     } else {
         emptyState.style.display = 'none'
+
+
+        filteredTask.forEach(task => {
+            const taskEl = createTask(task);
+            taskList.appendChild(taskEl);
+        });
     }
 }
 
@@ -190,20 +139,22 @@ const createTask = (task) => {
 
     li.className = `task-item ${task.completed ? 'completed' : ''}`
 
-    li.setAttribute('data-data-id', task.id);
+    li.setAttribute('data-id', task.id);
 
 
     li.innerHTML = `
         <div class="task-content">
-            <input type="checkbox" class="task-checkbox" ${task.completed ? checked : "" }
-                onChange="toggleTask${task.completed ? 'completed' : ""}">
+            <input type="checkbox" class="task-checkbox" ${task.completed ? "checked" : "" }
+                onchange="toggleTask(${task.id})">
 
-            <span class="task-text${task.completed ? 'completed' : ""}">${task.text}</span>
-            <button class="btn delete-btn" onClick="delete(${task.id})">
+            <span class="task-text ${task.completed ? 'completed' : ""}">${task.text}</span>
+            <button class="btn delete-btn" onclick="deleteTask(${task.id})">
                 Delete
             </button>
         
-        
+            <button class="btn edit-btn" onclick="editTask(${task.id})">
+                Edit
+            </button>
         </div>
     
     `;
@@ -211,11 +162,21 @@ const createTask = (task) => {
     return li
 }
 
+const updateTask = () => {
+    const total = tasks.length
+    const completed = tasks.filter(task => task.completed).length
+    const pending = total - completed
+
+    totalTaskElement.textContent = total
+    completedTask.textContent = completed
+    pendingTask.textContent = pending
+}
+
 
 const init = () => {
     addBtn.disabled = true;
     renderTask()
-    // updateTask()
+    updateTask()
 }
 
 init()
